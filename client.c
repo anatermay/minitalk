@@ -3,107 +3,94 @@
 /*                                                        :::      ::::::::   */
 /*   client.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aternero <aternero@student.42malaga.com    +#+  +:+       +#+        */
+/*   By: xle-boul <xle-boul@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/24 18:25:20 by aternero          #+#    #+#             */
-/*   Updated: 2024/11/24 20:54:03 by aternero         ###   ########.fr       */
+/*   Created: 2022/02/13 10:58:19 by xle-boul          #+#    #+#             */
+/*   Updated: 2022/02/21 20:22:12 by xle-boul         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minitalk.h"
 
-/*
-	- Señales: Las señales son interrupciones de software que se pueden enviar
-	a un proceso para activar acciones específicas. En este caso, utilizamos
-	señales SIGUSR1y SIGUSR2.
-
-	- Representación binaria: cada carácter de un mensaje de texto se puede
-	representar como un número binario (una secuencia de 0 y 1).
-
-	- Mapeo de señales: mapearemos SIGUSR1a 1 y SIGUSR2a 0.
-*/
-
-void	binary_conversion(char *message, int pid)
+void	ft_error_handler(int i)
 {
-	int		index;
-	int		base;
-	char	current_ascii_char;
-
-	index = 0;
-	while (message[index])
+	if (i == 0)
 	{
-		base = 128;
-		current_ascii_char = message[index];
-		while (base > 0)
-		{
-			if (current_ascii_char >= base)
-			{
-				kill(pid, SIGUSR1);
-				current_ascii_char = current_ascii_char - base;
-			}
-			else
-				kill(pid, SIGUSR2);
-			base = base / 2;
-			usleep(100);
-		}
-		index++;
+		write(1, "Error KILL\n", 12);
+		exit(1);
+	}
+	if (i == 1)
+	{
+		write(1, "Error SIGACTION\n", 17);
+		exit(1);
 	}
 }
 
-/*
-	Esta función toma dos argumentos: el mensaje a enviar y el PID
-	(ID de proceso) del proceso receptor.
-
-	- Iterando sobre caracteres: La función itera a través de cada
-	carácter del mensaje.
-
-	- Conversión a binario: Para cada carácter, lo convierte a su
-	representación binaria. Comienza con el bit más alto (128) y verifica
-	si el valor del carácter es mayor o igual que éste.
-		- Si es así, envía una SIGUSR1señal (que representa 1).
-		- Si no, envía una SIGUSR2señal (que representa 0).
-	Luego pasa al siguiente bit inferior (64) y repite el proceso.
-
-	- Envío de señales:
-		- La función kill se utiliza para enviar las señales
-		al PID especificado.
-		- usleepSe utiliza una función para introducir un pequeño
-		retraso entre señales para garantizar una recepción adecuada.
-*/
-
-int	main(int argc, char **argv)
+void	ft_send_terminator(int pid)
 {
-	int	pid;
+	static int	i = 0;
 
-	if (argc != 3)
-		return (-1);
-	pid = ft_atoi(argv[1]);
-	binary_conversion(argv[2], pid);
-	return (0);
+	if (i <= 8)
+		if (kill(pid, SIGUSR1) == -1)
+			ft_error_handler(0);
+	i++;
 }
 
-/*
-- Manejo de argumentos: Comprueba si se proporciona el número correcto de
-argumentos.
-- Extracción PID: Extrae el PID del proceso receptor del primer argumento.
-- Llamada de función: Llama a la binary_conversionfunción para convertir y
-enviar el mensaje.
+void	ft_send_signal(int pid, char *str)
+{
+	static int	bit = 0;
+	static char	*str_bis = 0;
 
-#############################################################################
+	if (str)
+		str_bis = str;
+	if (*str_bis)
+	{
+		if ((((unsigned char)*str_bis >> bit) % 2) == 0)
+			if (kill(pid, SIGUSR1) == -1)
+				ft_error_handler(0);
+		if ((((unsigned char)*str_bis >> bit) % 2) == 1)
+			if (kill(pid, SIGUSR2) == -1)
+				ft_error_handler(0);
+		bit++;
+		if (bit == 8)
+		{
+			str_bis++;
+			bit = 0;
+		}
+	}
+	if (!(*str_bis))
+		ft_send_terminator(pid);
+}
 
-Ejemplo: Consideremos el mensaje "Hola".
-- Carácter 'H':
-	- Representación binaria: 1001000
-	- Señales enviadas: SIGUSR1, SIGUSR2, SIGUSR1, SIGUSR2, SIGUSR2,SIGUSR2
-- Carácter 'e':
-	- Representación binaria: 1100101
-	- Señales enviadas: SIGUSR1, SIGUSR1, SIGUSR2, SIGUSR2, SIGUSR1, SIGUSR2,
-	SIGUSR1 // ... y así sucesivamente para el resto de caracteres.*/
+void	ft_receipt(int sig, siginfo_t *info, void *context)
+{
+	static int	id;
 
-/*
-	El código convierte eficazmente un mensaje de texto en una secuencia de
-	señales, lo que permite una comunicación segura entre procesos.
-	Al comprender la representación binaria de caracteres y la asignación de
-	señales a bits, podemos apreciar el mecanismo subyacente de esta técnica
-	de comunicación.
-*/
+	if (info->si_pid != 0)
+		id = info->si_pid;
+	(void)context ;
+	if (sig == SIGUSR1)
+		ft_send_signal(id, NULL);
+	if (sig == SIGUSR2)
+		exit(EXIT_SUCCESS);
+}
+
+int	main(int ac, char **av)
+{
+	struct sigaction	action;
+
+	action.sa_flags = SA_SIGINFO;
+	action.sa_sigaction = ft_receipt;
+	if (sigaction(SIGUSR1, &action, NULL) == -1
+		|| sigaction(SIGUSR2, &action, NULL) == -1)
+		ft_error_handler(1);
+	if (ac != 3)
+	{
+		write(1, "Utilisez le format: ./client <PID> <String>\n", 44);
+		exit(EXIT_FAILURE);
+	}
+	ft_send_signal(ft_atoi(av[1]), av[2]);
+	while (1)
+		pause();
+	return (0);
+}

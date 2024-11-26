@@ -3,20 +3,23 @@
 /*                                                        :::      ::::::::   */
 /*   minitalk_bonus.h                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aternero <aternero@student.42malaga.com    +#+  +:+       +#+        */
+/*   By: xle-boul <xle-boul@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/24 18:26:25 by aternero          #+#    #+#             */
-/*   Updated: 2024/11/24 18:31:52 by aternero         ###   ########.fr       */
+/*   Created: 2022/02/19 13:57:51 by xle-boul          #+#    #+#             */
+/*   Updated: 2022/02/19 13:57:52 by xle-boul         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MINITALK_BONUS_H
 # define MINITALK_BONUS_H
 
+# include <signal.h>
+# include <stdlib.h>
 # include <unistd.h>
-# include "libft/libft.h"
-# include "ft_printf/ft_printf.h"
+# include <string.h>
 
-/*FUNCTIONS*/
+void	ft_putnbr(int n);
+void	ft_putchar(char c);
+int		ft_atoi(char *str);
 
 #endif

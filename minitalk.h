@@ -3,27 +3,24 @@
 /*                                                        :::      ::::::::   */
 /*   minitalk.h                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aternero <aternero@student.42malaga.com    +#+  +:+       +#+        */
+/*   By: xle-boul <xle-boul@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/24 18:26:25 by aternero          #+#    #+#             */
-/*   Updated: 2024/11/24 20:53:39 by aternero         ###   ########.fr       */
+/*   Created: 2022/02/19 13:57:47 by xle-boul          #+#    #+#             */
+/*   Updated: 2022/02/21 19:29:20 by xle-boul         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MINITALK_H
 # define MINITALK_H
 
-/*LIBRARIES*/
-# include <unistd.h>
 # include <signal.h>
 # include <stdlib.h>
-# include <sys/types.h>
-	// My Libraries
-# include "libft/libft.h"
-# include "ft_printf/ft_printf.h"
+# include <unistd.h>
+# include <string.h>
+# include <locale.h>
 
-/*FUNCTIONS*/
-void	binary_conversion(char *message, int pid);
-void	char_to_binary(char *str);
+void	ft_putnbr(int n);
+void	ft_putchar(char c);
+int		ft_atoi(char *str);
 
 #endif
