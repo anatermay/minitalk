@@ -87,7 +87,7 @@ int	main(int ac, char **av)
 		client_error_handling(1);
 	if (ac != 3)
 	{
-		ft_printf("ERROR:\n   Please, use the format: ./client <PID> <String>\n");
+		ft_printf("ERROR:\n	Use the format: ./client <PID> <String>\n");
 		exit(EXIT_FAILURE);
 	}
 	client_messenger(ft_atoi(av[1]), av[2]);
